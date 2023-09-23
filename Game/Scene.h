@@ -33,6 +33,10 @@ public:
     Scene(MainWindow& mainWindow, QWidget* parent = nullptr) : QWidget(parent), m_mainWindow(mainWindow)
     {
         connect(this, &Scene::updateSignal, this, QOverload<>::of(&Scene::update));
+
+        m_ballPos.setY(-100);
+        m_1playerPos.setY(-100);
+        m_2playerPos.setY(-100);
     }
 
     void setMouseEventHandler( IMouseEventHandler* mouseEventHandler ) { m_mouseEventHandler = mouseEventHandler; }
