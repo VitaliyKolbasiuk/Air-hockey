@@ -9,6 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_PREFIX_PATH "/home/vitaliykolbasiuk/Qt/6.6.0/gcc_64/lib/cmake")
+
 if (APPLE)
     add_definitions(-DBOOST_ASIO_HAS_STD_INVOKE_RESULT)
     include_directories(SYSTEM /usr/local/include)
@@ -51,59 +53,39 @@ endif()
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        QtClientPlayer.h
-        CircleWidget.h
-        Scene.h
-        BoostClientServer/Server.h
-        BoostClientServer/TcpClient.h
-        BoostClientServer/Game.h
-        BoostClientServer/ClientPlayer.h
+add_executable(Server
+        Server/Server.cpp
+        Server/Server.h
+        Server/ClientPlayer.h
+        Server/Game.h
+        Log.h
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(GameProj
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET GameProj APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(GameProj SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(GameProj
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
-
-target_link_libraries(GameProj PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-set_target_properties(GameProj PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+add_executable(Client
+        Client/Client.cpp
+        Client/TcpClient.h
+        Client/QtClientPlayer.h
+        Client/Scene.h
+        Client/mainwindow.h
+        Client/mainwindow.cpp
+        Client/mainwindow.ui
+        Log.h
 )
 
-install(TARGETS GameProj
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+
+add_executable(Client2
+        Client/Client.cpp
+        Client/TcpClient.h
+        Client/QtClientPlayer.h
+        Client/Scene.h
+        Client/mainwindow.h
+        Client/mainwindow.cpp
+        Client/mainwindow.ui
+        Log.h
 )
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(GameProj)
-endif()
+
+target_link_libraries(Server PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(Client PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(Client2 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+

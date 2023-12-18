@@ -8,7 +8,7 @@
 #include <QMouseEvent>
 
 #include "mainwindow.h"
-#include "BoostClientServer/Interfaces.h"
+#include "../Interfaces.h"
 
 class Scene : public QWidget
 {
@@ -100,14 +100,10 @@ protected:
     }
 
     void mousePressEvent(QMouseEvent* event) override {
-        if ( m_mouseEventHandler )
-        {
-            m_mouseEventHandler->mousePressEvent(event);
-        }
-        //        calculateScene();
-        //        if (event->button() == Qt::LeftButton) {
-        //            isMousePressed = true;
-        //        }
+//        if ( m_mouseEventHandler )
+//        {
+//            m_mouseEventHandler->mousePressEvent(event);
+//        }
     }
 
     void mouseMoveEvent(QMouseEvent* event) override {
@@ -115,22 +111,12 @@ protected:
         {
             m_mouseEventHandler->mouseMoveEvent(event);
         }
-        //        calculateScene();
-        //        if (isMousePressed) {
-        //            ellipsePos.setX( event->pos().x() - ellipseRadius );
-        //            ellipsePos.setY( event->pos().y() - ellipseRadius );
-        //            calculateScene();
-        //        }
     }
 
     void mouseReleaseEvent(QMouseEvent* event) override {
-        if ( m_mouseEventHandler )
-        {
-            m_mouseEventHandler->mouseReleaseEvent(event);
-        }
-        //        calculateScene();
-        //        if (event->button() == Qt::LeftButton) {
-        //            isMousePressed = false;
-        //        }
+//        if ( m_mouseEventHandler )
+//        {
+//            m_mouseEventHandler->mouseReleaseEvent(event);
+//        }
     }
 };
