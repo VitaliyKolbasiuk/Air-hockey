@@ -56,8 +56,10 @@ public:
     {}
     
 public:
-    double m_width;
-    double m_height;
+    double m_gameWindowWidth;
+    double m_gameWindowHeight;
+    double m_mainWindowWidth;
+    double m_mainWindowHeight;
     
     double m_xBall;
     double m_yBall;
@@ -66,9 +68,11 @@ public:
     
     double m_x1Player;
     double m_y1Player;
+    int    scoreLeftPlayer = 0;
     
     double m_x2Player;
     double m_y2Player;
+    int    scoreRightPlayer = 0;
     
     double m_ballRadius = 15;
     double m_playerRadius = 50;
@@ -78,35 +82,63 @@ public:
 
     void init( int width, int height )
     {
-        m_width = width;
-        m_height = height;
+        m_gameWindowWidth = width;
+        m_gameWindowHeight = height * 0.8;
+
+        m_mainWindowWidth = width;
+        m_mainWindowHeight = height;
         
-        m_ballRadius = (5 * 1800) / (m_width+m_height);
-        m_playerRadius = (15 * 1800) / (m_width+m_height);
+        m_ballRadius = (7.5 * 1800) / (m_gameWindowWidth + m_gameWindowHeight);
+        m_playerRadius = (15 * 1800) / (m_gameWindowWidth + m_gameWindowHeight);
         
-        m_xBall = m_width/2.0;
-        m_yBall = m_height/2.0;
+        m_xBall = m_gameWindowWidth / 2.0;
+        m_yBall = m_gameWindowHeight / 2.0;
         m_dx = 6;
         m_dy = 2;
 
         m_x1Player = 2*m_playerRadius;
-        m_y1Player = m_height*2;
+        m_y1Player = m_gameWindowHeight * 2;
         
-        m_x2Player = m_width - 2*m_playerRadius;
-        m_y2Player = m_height*2;
+        m_x2Player = m_gameWindowWidth - 2 * m_playerRadius;
+        m_y2Player = m_gameWindowHeight * 2;
     }
     
     void onClientPositionChanged( Player* player, int x, int y )
     {
+
+        int diameter = m_playerRadius * 2;
+        if (y + diameter < 0)
+        {
+            y = 0;
+        }
+        else if (y + diameter > m_gameWindowHeight)
+        {
+            y = m_gameWindowHeight - diameter;
+        }
+
         if ( player->m_isLeft )
         {
-//            LOG( "leftPlayer: " << x << " " << y );
+            if (x + diameter > m_gameWindowWidth / 2)
+            {
+                x = m_gameWindowWidth / 2 - diameter;
+            }
+            else if (x + diameter < 0)
+            {
+                x = 0;
+            }
             m_x1Player = x;
             m_y1Player = y;
         }
         else
         {
-            //LOG( "rightPlayer: " << x << " " << y );
+            if (x < m_gameWindowWidth / 2)
+            {
+                x = m_gameWindowWidth / 2;
+            }
+            else if (x + diameter > m_gameWindowWidth)
+            {
+                x = m_gameWindowWidth - diameter;
+            }
             m_x2Player = x;
             m_y2Player = y;
         }
@@ -203,7 +235,21 @@ public:
             dy = -sinFi * dxRotated + cosFi * dyRotated;
         }
     }
-    
+
+    bool ballsIntersecting(double x1, double y1, double radius1, double x2, double y2, double radius2)
+    {
+        // Calculate the distance between the centers of the two balls
+        double distance = std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
+
+        // Check if the distance is less than or equal to the sum of the radii
+        if (distance <= radius1 + radius2)
+        {
+            return true; // The balls are intersecting
+        }
+        return false; // The balls are not intersecting
+    }
+
+
     void calculateScene( double deltaTime )
     {
         auto x1PlayerCenter = m_x1Player + m_playerRadius;
@@ -234,33 +280,58 @@ public:
         auto& y = m_yBall;
 
         // intersected with player1
-        if ( (ballX - playerX1) * (ballX - playerX1) + (ballY - playerY1) * (ballY - playerY1) <= (radius + ellipseRadius+3) * (radius + ellipseRadius+3) )
+        if ( ballsIntersecting(ballX, ballY, radius, playerX1, playerY1, ellipseRadius) )
         {
             if ( !m_isIntersected1 )
             {
                 calcBump( dx, dy, ballX, ballY, playerX1, playerY1 );
                 m_isIntersected1 = true;
                 static int counter = 0;
-                std::cout << "--" << ++counter << " bump1\n";
+                qDebug() << "--" << ++counter << " bump1\n";
             }
         }
         // intersected with player2
-        else if ( (ballX - playerX2) * (ballX - playerX2) + (ballY - playerY2) * (ballY - playerY2) <= (radius + ellipseRadius+3) * (radius + ellipseRadius+3) )
+        else if ( ballsIntersecting(ballX, ballY, radius, playerX2, playerY2, ellipseRadius)  )
         {
             if ( !m_isIntersected2 )
             {
                 calcBump( dx, dy, ballX, ballY, playerX2, playerY2 );
-                m_isIntersected1 = true;
+                m_isIntersected2 = true;
                 //std::cout << "--bump2\n";
             }
         }
         // not intersected
         else
         {
-            if (x + dx > m_width - radius || x + dx < 0) {
-                dx = -dx;
+            if (x + dx > m_gameWindowWidth - radius) {
+                scoreLeftPlayer++;
+
+                std::shared_ptr<boost::asio::streambuf> wrStreambuf1 = std::make_shared<boost::asio::streambuf>();
+                std::ostream os1(&(*wrStreambuf1));
+                os1 << UPDATE_SCORE_CMD ";" << std::to_string(scoreLeftPlayer) + ';' << std::to_string(scoreRightPlayer) << ";\n";
+                m_player1->m_session->sendMessage( wrStreambuf1 );
+
+                std::shared_ptr<boost::asio::streambuf> wrStreambuf2 = std::make_shared<boost::asio::streambuf>();
+                std::ostream os2(&(*wrStreambuf2));
+                os2 << UPDATE_SCORE_CMD ";" << std::to_string(scoreLeftPlayer) + ';' << std::to_string(scoreRightPlayer) << ";\n";
+                m_player1->m_session->sendMessage( wrStreambuf2 );
             }
-            if (y + dy > m_height - radius || y + dy < 0) {
+            else if (x + dx < 0)
+            {
+                scoreRightPlayer++;
+
+                std::shared_ptr<boost::asio::streambuf> wrStreambuf1 = std::make_shared<boost::asio::streambuf>();
+                std::ostream os1(&(*wrStreambuf1));
+                os1 << UPDATE_SCORE_CMD ";" << std::to_string(scoreLeftPlayer) + ';' << std::to_string(scoreRightPlayer) << ";\n";
+                m_player1->m_session->sendMessage( wrStreambuf1 );
+
+                std::shared_ptr<boost::asio::streambuf> wrStreambuf2 = std::make_shared<boost::asio::streambuf>();
+                std::ostream os2(&(*wrStreambuf2));
+                os2 << UPDATE_SCORE_CMD ";" << std::to_string(scoreLeftPlayer) + ';' << std::to_string(scoreRightPlayer) << ";\n";
+                m_player1->m_session->sendMessage( wrStreambuf2 );
+            }
+
+            if (y + dy > m_gameWindowHeight - radius || y + dy < 0) {
                 dy = -dy;
             }
 
@@ -277,7 +348,7 @@ public:
         m_xBall = m_xBall + m_dx*deltaTime;
         m_yBall = m_yBall + m_dy*deltaTime;
 
-        
+
         sendUpdateScene();
     }
     

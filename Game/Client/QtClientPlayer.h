@@ -73,6 +73,7 @@ public:
             double height = std::stod(heightStr);
 
             m_scene.setSceneSize(width, height);
+            m_scene.setScene();
         }
         else if (command == UPDATE_SCENE_CMD)
         {
@@ -110,7 +111,7 @@ public:
 
             m_scene.draw(x, y, x1Player, y1Player, x2Player, y2Player, ballRadius, playerRadius);
         }
-        else if (command == "Score")
+        else if (command == UPDATE_SCORE_CMD)
         {
             std::string score;
             std::getline(input, score, ';');
@@ -119,8 +120,7 @@ public:
             std::getline(input, score, ';');
             int rightScore = std::stoi(score);
 
-            // TODO : Qt -> set score
-            // TODO : Qt -> set x and y to the beginning location
+
         }
     }
 

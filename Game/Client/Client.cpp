@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
         io_context  ioContext1;
         TcpClient client1(ioContext1, player1);
         player1.setTcpClient(&client1);
-        client1.execute("127.0.0.1", 1234, START_GAME_CMD ";001;1000;800;");
+        client1.execute("127.0.0.1", 1234, START_GAME_CMD ";001;1200;1000;");
 //        client1.execute("?.?.?.?", 1234, START_GAME_CMD ";001;1000;800;");
 
         ioContext1.run();

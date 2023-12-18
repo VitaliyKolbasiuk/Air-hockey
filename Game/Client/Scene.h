@@ -18,7 +18,8 @@ class Scene : public QWidget
     
     IMouseEventHandler* m_mouseEventHandler = nullptr;
 
-    QSize  m_size;
+    QSize  m_windowSize;
+    QSize  m_gameSize;
     QPoint m_ballPos;
     QPoint m_1playerPos;
     QPoint m_2playerPos;
@@ -47,7 +48,7 @@ public:
 
         m_mainWindow.centralWidget()->setLayout(new QVBoxLayout);
         m_mainWindow.centralWidget()->layout()->addWidget(this);
-        
+
 
         m_mainWindow.show();
     }
@@ -56,12 +57,25 @@ public:
     {
         QMetaObject::invokeMethod(this, [=, this]
         {
-            m_size.setWidth( width );
-            m_size.setHeight( height );
-            m_mainWindow.resize( width, height );
-            QSize sz = m_mainWindow.centralWidget()->size();
-            m_mainWindow.resize( width+100, height+height-sz.height()+100 );
+            m_gameSize.setWidth(width);
+            m_gameSize.setHeight(height * 0.8);
+            m_windowSize.setWidth( width );
+            m_windowSize.setHeight( height );
+            m_mainWindow.resize( width + 50, height + 50 );
+            //m_mainWindow.centralWidget()->setFixedSize(m_windowSize);
         }, Qt::QueuedConnection);
+    }
+
+    void setScene()
+    {
+//        QMetaObject::invokeMethod(this, [=, this] {
+//            m_mainWindow.m_scoreLabel = new QLabel();
+//            //m_mainWindow.centralWidget()->layout()->addWidget(m_mainWindow.m_scoreLabel);
+//
+//            QLabel* scoreLabel = m_mainWindow.m_scoreLabel;
+//            scoreLabel->setGeometry(m_windowSize.width() / 2, m_windowSize.height() -  m_windowSize.height() * 0.8 / 2, 200, 50);
+//            scoreLabel->setText("SCORE 0:0");
+//        }, Qt::QueuedConnection);
     }
 
     void draw(double x, double y, double xPlayer1, double yPlayer1, double xPlayer2, double yPlayer2, double ballRadius, double playerRadius)
@@ -85,9 +99,10 @@ protected:
         Q_UNUSED(event);
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setPen(Qt::black);
 
         painter.setBrush(Qt::darkGreen);
-        painter.drawRect( 0, 0, m_size.width(), m_size.height() );
+        painter.drawRect(0, 0, m_gameSize.width(), m_gameSize.height());
 
         painter.setBrush(Qt::red);
         painter.drawEllipse(m_1playerPos.x(), m_1playerPos.y(), m_playerRadius * 2, m_playerRadius * 2);
@@ -95,8 +110,10 @@ protected:
         painter.setBrush(Qt::red);
         painter.drawEllipse(m_2playerPos.x(), m_2playerPos.y(), m_playerRadius * 2, m_playerRadius * 2);
 
-        painter.setBrush(Qt::blue);
+        painter.setBrush(Qt::cyan);
         painter.drawEllipse(m_ballPos.x(), m_ballPos.y(), m_radius * 2, m_radius * 2);
+
+        painter.drawLine(m_gameSize.width() / 2, 0, m_gameSize.width() / 2, m_gameSize.height());
     }
 
     void mousePressEvent(QMouseEvent* event) override {

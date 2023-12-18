@@ -65,8 +65,8 @@ public:
         {
             m_playerY = m_height;
         }
-//        m_playerX = m_width/2;
-//        m_playerY = m_height/2;
+//        m_playerX = m_gameWindowWidth/2;
+//        m_playerY = m_gameWindowHeight/2;
     }
 };
 

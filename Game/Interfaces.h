@@ -9,6 +9,7 @@
 #define WAIT_2d_PLAYER_CMD  "WaitingSecondPlayer"
 #define GAME_STARTED_CMD    "GameStarted"
 #define UPDATE_SCENE_CMD    "UpdateScene"
+#define UPDATE_SCORE_CMD    "UpdateScore"
 
 // messages from client to server
 #define START_GAME_CMD      "StartGame"
