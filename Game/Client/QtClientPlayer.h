@@ -120,7 +120,7 @@ public:
             std::getline(input, score, ';');
             int rightScore = std::stoi(score);
 
-
+            m_scene.updateScore(leftScore, rightScore);
         }
     }
 

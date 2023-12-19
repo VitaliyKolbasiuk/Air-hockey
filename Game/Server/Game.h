@@ -97,10 +97,10 @@ public:
         m_dy = 2;
 
         m_x1Player = 2*m_playerRadius;
-        m_y1Player = m_gameWindowHeight * 2;
+        m_y1Player = m_gameWindowHeight / 2;
         
         m_x2Player = m_gameWindowWidth - 2 * m_playerRadius;
-        m_y2Player = m_gameWindowHeight * 2;
+        m_y2Player = m_gameWindowHeight / 2;
     }
     
     void onClientPositionChanged( Player* player, int x, int y )
@@ -303,32 +303,33 @@ public:
         // not intersected
         else
         {
-            if (x + dx > m_gameWindowWidth - radius) {
-                scoreLeftPlayer++;
-
-                std::shared_ptr<boost::asio::streambuf> wrStreambuf1 = std::make_shared<boost::asio::streambuf>();
-                std::ostream os1(&(*wrStreambuf1));
-                os1 << UPDATE_SCORE_CMD ";" << std::to_string(scoreLeftPlayer) + ';' << std::to_string(scoreRightPlayer) << ";\n";
-                m_player1->m_session->sendMessage( wrStreambuf1 );
-
-                std::shared_ptr<boost::asio::streambuf> wrStreambuf2 = std::make_shared<boost::asio::streambuf>();
-                std::ostream os2(&(*wrStreambuf2));
-                os2 << UPDATE_SCORE_CMD ";" << std::to_string(scoreLeftPlayer) + ';' << std::to_string(scoreRightPlayer) << ";\n";
-                m_player1->m_session->sendMessage( wrStreambuf2 );
-            }
-            else if (x + dx < 0)
+            if (x + dx > m_gameWindowWidth - radius || x + dx < 0)
             {
-                scoreRightPlayer++;
+                if (x + dx > m_gameWindowWidth - radius)
+                {
+                    scoreLeftPlayer++;
+                    m_dx = m_dx ? -m_dx : m_dx;
+                    m_dy = m_dy ? -m_dy : m_dy;
+                }
+                else if (x + dx < 0)
+                {
+                    scoreRightPlayer++;
+                    m_dx = std::abs(m_dx);
+                    m_dy = std::abs(m_dy);
+                }
 
                 std::shared_ptr<boost::asio::streambuf> wrStreambuf1 = std::make_shared<boost::asio::streambuf>();
                 std::ostream os1(&(*wrStreambuf1));
                 os1 << UPDATE_SCORE_CMD ";" << std::to_string(scoreLeftPlayer) + ';' << std::to_string(scoreRightPlayer) << ";\n";
-                m_player1->m_session->sendMessage( wrStreambuf1 );
+                m_player1->m_session->sendMessage(wrStreambuf1);
 
                 std::shared_ptr<boost::asio::streambuf> wrStreambuf2 = std::make_shared<boost::asio::streambuf>();
                 std::ostream os2(&(*wrStreambuf2));
                 os2 << UPDATE_SCORE_CMD ";" << std::to_string(scoreLeftPlayer) + ';' << std::to_string(scoreRightPlayer) << ";\n";
-                m_player1->m_session->sendMessage( wrStreambuf2 );
+                m_player2->m_session->sendMessage(wrStreambuf2);
+
+                m_xBall = m_gameWindowWidth / 2.0;
+                m_yBall = m_gameWindowHeight / 2.0;
             }
 
             if (y + dy > m_gameWindowHeight - radius || y + dy < 0) {

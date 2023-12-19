@@ -68,14 +68,24 @@ public:
 
     void setScene()
     {
-//        QMetaObject::invokeMethod(this, [=, this] {
-//            m_mainWindow.m_scoreLabel = new QLabel();
-//            //m_mainWindow.centralWidget()->layout()->addWidget(m_mainWindow.m_scoreLabel);
-//
-//            QLabel* scoreLabel = m_mainWindow.m_scoreLabel;
-//            scoreLabel->setGeometry(m_windowSize.width() / 2, m_windowSize.height() -  m_windowSize.height() * 0.8 / 2, 200, 50);
-//            scoreLabel->setText("SCORE 0:0");
-//        }, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(this, [=, this] {
+            m_mainWindow.m_scoreLabel = new QLabel();
+            QLabel* scoreLabel = m_mainWindow.m_scoreLabel;
+            scoreLabel->setParent(&m_mainWindow);
+
+            scoreLabel->setStyleSheet("font-size: 30pt; color: yellow; font-weight: bold;");
+            scoreLabel->setFixedSize(200, 50);
+            scoreLabel->setText("SCORE 0:0");
+            scoreLabel->move(m_windowSize.width() / 2 - scoreLabel->width() / 2, m_windowSize.height() -  m_windowSize.height() * 0.2);
+            scoreLabel->show();
+        }, Qt::QueuedConnection);
+    }
+
+    void updateScore(int leftPlayerScore, int rightPlayerScore)
+    {
+        QLabel* scoreLabel = m_mainWindow.m_scoreLabel;
+        scoreLabel->setText("SCORE " + QString::fromStdString(std::to_string(leftPlayerScore) + ':' + std::to_string(rightPlayerScore)));
+
     }
 
     void draw(double x, double y, double xPlayer1, double yPlayer1, double xPlayer2, double yPlayer2, double ballRadius, double playerRadius)
